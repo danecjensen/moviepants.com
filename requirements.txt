@@ -1,5 +1,17 @@
-Flask>=2.0
-flask-talisman
-flask-seasurf @ https://github.com/maxcountryman/flask-seasurf/archive/f383b482c69e0b0e8064a8eb89305cea3826a7b6.zip
-google-cloud-ndb
+# MoviePants Requirements
+
+# Core Flask framework
+Flask>=2.0,<4.0
+
+# HTTP requests for TMDB API
 requests>=2.28.0
+
+# Security headers and CSRF protection
+flask-talisman>=1.0.0
+flask-seasurf @ https://github.com/maxcountryman/flask-seasurf/archive/f383b482c69e0b0e8064a8eb89305cea3826a7b6.zip
+
+# Google Cloud dependencies (for App Engine deployment)
+google-cloud-ndb>=2.0.0
+
+# Production server (for GAE deployment)
+gunicorn>=20.1.0

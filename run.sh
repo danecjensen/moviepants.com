@@ -25,4 +25,4 @@ fi
 echo "Starting Flask server..."
 echo "Open http://localhost:5000 in your browser"
 echo ""
-python3 app.py
+python3 main.py

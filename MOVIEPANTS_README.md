@@ -44,19 +44,55 @@ pip install -r requirements.txt
 
    **Note**: The app will work without an API key using mock data, but you won't be able to search for real movies.
 
-### Running the Application
+### Running the Application Locally
 
-1. Start the Flask server:
+**Option 1: Using the quick start script**
 ```bash
-python app.py
+./run.sh
 ```
 
-2. Open your browser and navigate to:
-```
-http://localhost:5000
+**Option 2: Run directly**
+```bash
+python main.py
 ```
 
-3. Create a session and share the session ID with your friends!
+**Option 3: Using gunicorn (production-like)**
+```bash
+gunicorn -b :8080 main:app
+```
+
+Open your browser and navigate to:
+```
+http://localhost:5000  (or http://localhost:8080 for gunicorn)
+```
+
+Create a session and share the session ID with your friends!
+
+### Deploying to Google App Engine
+
+This application is configured for Google App Engine deployment:
+
+1. Install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
+
+2. Initialize your project:
+```bash
+gcloud init
+gcloud config set project YOUR-PROJECT-ID
+```
+
+3. Update `app.yaml` with your configuration:
+   - Change `SECRET_KEY` to a secure random value
+   - Add your `TMDB_API_KEY` if you have one
+
+4. Deploy:
+```bash
+gcloud app deploy
+```
+
+5. View your app:
+```bash
+gcloud app browse
+```
 
 ## Usage Guide
 
@@ -93,17 +129,23 @@ http://localhost:5000
 
 ### File Structure
 
+This project follows the Flask GAE Starter template structure:
+
 ```
 moviepants.com/
-├── app.py                  # Main Flask application
+├── main.py                 # Main Flask application
+├── settings.py             # Application configuration
 ├── requirements.txt        # Python dependencies
+├── app.yaml               # Google App Engine configuration
+├── .gcloudignore          # Files to exclude from GAE deployment
+├── run.sh                 # Quick start script for local development
 ├── templates/
 │   ├── base.html          # Base template with common styles
 │   ├── index.html         # Home page (create/join session)
 │   ├── session.html       # Session page (add movies)
 │   ├── vote.html          # Voting page (swipe interface)
 │   └── results.html       # Results page (winner announcement)
-└── static/                # Static files (if needed)
+└── static/                # Static files (CSS, JS, images)
 ```
 
 ### API Endpoints
