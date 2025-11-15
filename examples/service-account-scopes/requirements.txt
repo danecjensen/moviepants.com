@@ -1,0 +1,6 @@
+Flask
+google-auth
+google-cloud-storage
+grpcio
+requests
+https://github.com/google/gae-secure-scaffold-python3/archive/master.zip
