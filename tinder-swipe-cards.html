@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tinder-style Swipe Cards</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f4f4;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tinder {
+      position: relative;
+      width: 320px;
+      max-width: 100vw;
+      height: 480px;
+    }
+
+    .tinder--cards {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .tinder--card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      padding-bottom: 56px; /* space for text */
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+    .tinder--card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .tinder--card-content {
+      position: relative;
+      padding: 16px;
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.75),
+        rgba(0, 0, 0, 0.3),
+        transparent
+      );
+      color: #fff;
+      margin-top: auto;
+    }
+
+    .tinder--card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+
+    .tinder--card p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .tinder--buttons {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      z-index: 50;
+    }
+
+    .tinder--buttons button {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      background: #fff;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+    }
+
+    .tinder--buttons button:active {
+      transform: scale(0.94);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    }
+
+    .btn-nope {
+      color: #ff4f6a;
+    }
+
+    .btn-like {
+      color: #24d366;
+    }
+
+    .tinder--status {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      right: 24px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .tinder--status span {
+      border: 3px solid;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: scale(0.8) rotate(-10deg);
+      transition: opacity 0.12s ease-out, transform 0.12s ease-out;
+    }
+
+    .tinder--status .like {
+      border-color: #24d366;
+      color: #24d366;
+      align-self: flex-start;
+      transform: scale(0.8) rotate(-18deg);
+    }
+
+    .tinder--status .nope {
+      border-color: #ff4f6a;
+      color: #ff4f6a;
+      align-self: flex-end;
+      transform: scale(0.8) rotate(18deg);
+    }
+
+    .tinder--card.liked ~ .tinder--status .like,
+    .tinder--card.nope ~ .tinder--status .nope {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="tinder">
+    <div class="tinder--cards">
+      <!-- Top card should be last in the DOM -->
+      <div class="tinder--card">
+        <img src="https://picsum.photos/id/1027/600/900" alt="Card 3" />
+        <div class="tinder--card-content">
+          <h3>Ava, 29</h3>
+          <p>Weekend hikes, analog photography, and strong coffee.</p>
+        </div>
+      </div>
+      <div class="tinder--card">
+        <img src="https://picsum.photos/id/1011/600/900" alt="Card 2" />
+        <div class="tinder--card-content">
+          <h3>Noah, 31</h3>
+          <p>Builder, cyclist, and taco evangelist.</p>
+        </div>
+      </div>
+      <div class="tinder--card">
+        <img src="https://picsum.photos/id/1005/600/900" alt="Card 1" />
+        <div class="tinder--card-content">
+          <h3>Mia, 27</h3>
+          <p>Design, live music, and spontaneous trips.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tinder--status">
+      <span class="nope">NOPE</span>
+      <span class="like">LIKE</span>
+    </div>
+
+    <div class="tinder--buttons">
+      <button class="btn-nope" type="button" id="nopeBtn">✕</button>
+      <button class="btn-like" type="button" id="likeBtn">❤</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const container = document.querySelector(".tinder");
+      const cardContainer = container.querySelector(".tinder--cards");
+      const nopeBtn = container.querySelector("#nopeBtn");
+      const likeBtn = container.querySelector("#likeBtn");
+
+      let cards = Array.from(cardContainer.querySelectorAll(".tinder--card"));
+      let isDragging = false;
+      let startX, startY, currentX, currentY;
+      let currentCard = null;
+      let currentRect = null;
+
+      const swipeThreshold = 120; // px horizontal
+
+      function initCards() {
+        cards = Array.from(cardContainer.querySelectorAll(".tinder--card"));
+        cards.forEach((card, index) => {
+          const scale = 1 - index * 0.03;
+          const translateY = index * 10;
+          card.style.zIndex = cards.length - index;
+          card.style.transform = `scale(${scale}) translateY(${translateY}px)`;
+          card.style.opacity = index === 0 ? "1" : "0.95";
+        });
+      }
+
+      function setActiveCard(card) {
+        currentCard = card;
+        currentRect = card.getBoundingClientRect();
+        card.style.transition = "none";
+      }
+
+      function resetCard(card) {
+        card.classList.remove("liked", "nope");
+        card.style.transition = "transform 0.25s ease-out";
+        card.style.transform = "";
+      }
+
+      function handlePointerDown(e) {
+        if (isDragging) return;
+        const card = e.currentTarget;
+
+        // Only allow dragging top card
+        if (cards[0] !== card) return;
+
+        isDragging = true;
+        container.setPointerCapture?.(e.pointerId);
+        setActiveCard(card);
+
+        startX = e.clientX;
+        startY = e.clientY;
+        currentX = startX;
+        currentY = startY;
+      }
+
+      function handlePointerMove(e) {
+        if (!isDragging || !currentCard) return;
+
+        currentX = e.clientX;
+        currentY = e.clientY;
+
+        const dx = currentX - startX;
+        const dy = currentY - startY;
+
+        const rotation = dx * 0.06; // degrees
+        const moveOutWidth = cardContainer.clientWidth * 1.5;
+
+        currentCard.style.transform = `translate(${dx}px, ${dy}px) rotate(${rotation}deg)`;
+
+        currentCard.classList.toggle("liked", dx > 0);
+        currentCard.classList.toggle("nope", dx < 0);
+
+        // Simple opacity tweak for underlying cards
+        const absDx = Math.abs(dx);
+        const factor = Math.min(absDx / moveOutWidth, 1);
+        if (cards[1]) {
+          cards[1].style.opacity = (0.9 + factor * 0.1).toString();
+        }
+      }
+
+      function handlePointerUp(e) {
+        if (!isDragging || !currentCard) return;
+
+        const dx = currentX - startX;
+        const dy = currentY - startY;
+
+        isDragging = false;
+
+        const absDx = Math.abs(dx);
+        const direction = dx > 0 ? 1 : -1;
+
+        if (absDx > swipeThreshold) {
+          // Swipe out
+          swipeCard(currentCard, direction, dy);
+        } else {
+          // Snap back
+          resetCard(currentCard);
+          currentCard = null;
+        }
+      }
+
+      function swipeCard(card, direction, dy = 0) {
+        const moveOutWidth = cardContainer.clientWidth * 1.8;
+        card.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
+
+        const endX = direction * moveOutWidth;
+        const endY = dy * 1.2;
+        const rotation = direction * 40;
+
+        card.style.transform = `translate(${endX}px, ${endY}px) rotate(${rotation}deg)`;
+        card.style.opacity = "0";
+
+        card.addEventListener(
+          "transitionend",
+          () => {
+            card.remove();
+            currentCard = null;
+            initCards();
+          },
+          { once: true }
+        );
+      }
+
+      function programmaticSwipe(direction) {
+        cards = Array.from(cardContainer.querySelectorAll(".tinder--card"));
+        if (!cards.length) return;
+        const card = cards[0];
+        card.classList.toggle("liked", direction === 1);
+        card.classList.toggle("nope", direction === -1);
+        swipeCard(card, direction, 0);
+      }
+
+      // Attach pointer events
+      cards.forEach((card) => {
+        card.addEventListener("pointerdown", handlePointerDown);
+      });
+
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
+
+      // Buttons
+      nopeBtn.addEventListener("click", () => programmaticSwipe(-1));
+      likeBtn.addEventListener("click", () => programmaticSwipe(1));
+
+      initCards();
+    })();
+  </script>
+</body>
+</html>
