@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Results - MoviePants{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .winner-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 16px;
+        text-align: center;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .winner-card h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+
+    .winner-movie {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    .winner-movie img {
+        max-width: 200px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .winner-info {
+        text-align: left;
+        max-width: 400px;
+    }
+
+    .winner-info h3 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+
+    .winner-stats {
+        font-size: 1.2rem;
+        margin-top: 10px;
+    }
+
+    .results-list {
+        margin-top: 30px;
+    }
+
+    .result-item {
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+
+    .result-item img {
+        width: 80px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .result-info {
+        flex: 1;
+    }
+
+    .result-info h4 {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .result-stats {
+        display: flex;
+        gap: 15px;
+        margin-top: 8px;
+    }
+
+    .stat-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .stat-likes {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .stat-nopes {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .rank-badge {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #667eea;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .rank-badge.first {
+        background: #ffd700;
+        color: #000;
+    }
+
+    .rank-badge.second {
+        background: #c0c0c0;
+        color: #000;
+    }
+
+    .rank-badge.third {
+        background: #cd7f32;
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="text-align: center; margin-bottom: 30px;">Voting Results</h2>
+
+    {% if movie_scores %}
+        {% set winner = movie_scores[0] %}
+        <div class="winner-card">
+            <h2>🏆 Winner!</h2>
+            <div class="winner-movie">
+                {% if winner.movie.poster_path %}
+                    <img src="{{ tmdb_image_base_url }}{{ winner.movie.poster_path }}" alt="{{ winner.movie.title }}">
+                {% endif %}
+                <div class="winner-info">
+                    <h3>{{ winner.movie.title }}</h3>
+                    {% if winner.movie.release_date %}
+                        <p style="opacity: 0.9;">{{ winner.movie.release_date[:4] }}</p>
+                    {% endif %}
+                    <div class="winner-stats">
+                        <div>❤️ {{ winner.likes }} likes</div>
+                        <div>✕ {{ winner.nopes }} passes</div>
+                        {% if total_friends > winner.total_votes %}
+                            <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">
+                                ({{ total_friends - winner.total_votes }} friends didn't vote)
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-list">
+            <h3 style="margin-bottom: 20px;">All Movies</h3>
+            {% for item in movie_scores %}
+                <div class="result-item">
+                    <div class="rank-badge {% if loop.index == 1 %}first{% elif loop.index == 2 %}second{% elif loop.index == 3 %}third{% endif %}">
+                        {{ loop.index }}
+                    </div>
+                    {% if item.movie.poster_path %}
+                        <img src="{{ tmdb_image_base_url }}{{ item.movie.poster_path }}" alt="{{ item.movie.title }}">
+                    {% else %}
+                        <div style="width: 80px; height: 120px; background: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; text-align: center; padding: 5px;">
+                            No Poster
+                        </div>
+                    {% endif %}
+                    <div class="result-info">
+                        <h4>{{ item.movie.title }}</h4>
+                        <p style="color: #666; font-size: 0.9rem;">
+                            Added by {{ item.movie.added_by }}
+                            {% if item.movie.release_date %}
+                                • {{ item.movie.release_date[:4] }}
+                            {% endif %}
+                        </p>
+                        <div class="result-stats">
+                            <span class="stat-badge stat-likes">❤️ {{ item.likes }} likes</span>
+                            <span class="stat-badge stat-nopes">✕ {{ item.nopes }} nopes</span>
+                            {% if total_friends > item.total_votes %}
+                                <span class="stat-badge" style="background: #e2e3e5; color: #383d41;">
+                                    {{ total_friends - item.total_votes }} didn't vote
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="btn btn-primary" onclick="window.location.href='/session/{{ session_id }}'">
+                Back to Session
+            </button>
+            <button class="btn btn-success" onclick="window.location.href='/'" style="margin-left: 10px;">
+                Create New Session
+            </button>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666;">No votes yet. Start voting to see results!</p>
+    {% endif %}
+</div>
+{% endblock %}
